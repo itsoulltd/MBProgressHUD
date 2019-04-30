@@ -6,6 +6,20 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		8F2E02CB2277FA22001523B6 /* Aggregate */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 8F2E02CE2277FA22001523B6 /* Build configuration list for PBXAggregateTarget "Aggregate" */;
+			buildPhases = (
+				8F2E02CF2277FA26001523B6 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = Aggregate;
+			productName = Aggregate;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		1315DD7617804CBC0032507D /* MBProgressHUD.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D286A7511518C70F00E13FB8 /* MBProgressHUD.h */; };
 		1777D3E71D757B690037C7F1 /* MBProgressHUD.h in Headers */ = {isa = PBXBuildFile; fileRef = D286A7511518C70F00E13FB8 /* MBProgressHUD.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -214,6 +228,11 @@
 					1D104D791ACA36CC00973364 = {
 						CreatedOnToolsVersion = 6.2;
 					};
+					8F2E02CB2277FA22001523B6 = {
+						CreatedOnToolsVersion = 9.2;
+						DevelopmentTeam = YS4F7VX5G2;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = D286A7431518C70E00E13FB8 /* Build configuration list for PBXProject "MBProgressHUD" */;
@@ -231,6 +250,7 @@
 				D286A7481518C70F00E13FB8 /* MBProgressHUD Static Library */,
 				1D104D791ACA36CC00973364 /* MBProgressHUD Framework */,
 				1777D3DE1D757AF50037C7F1 /* MBProgressHUD Framework tvOS */,
+				8F2E02CB2277FA22001523B6 /* Aggregate */,
 			);
 		};
 /* End PBXProject section */
@@ -251,6 +271,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8F2E02CF2277FA26001523B6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Merge Script\n\n# 1\n# Set bash script to exit immediately if any commands fail.\nset -e\n\n# 2\n# Setup some constants for use later on.\nFRAMEWORK_NAME=\"MBProgressHUD\"\n\n#Here we create default directory structure on desktop if not exist\nmkdir -p \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild\"\nmkdir -p \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/Release\"\n\n# 3\n# If remnants from a previous build exist, delete them.\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi\n\n# 4\n# Build the framework for device and for simulator (using\n# all needed architectures).\nxcodebuild -target \"${FRAMEWORK_NAME} Framework\" -configuration Debug -arch arm64 -arch armv7 -arch armv7s only_active_arch=no defines_module=yes -sdk \"iphoneos\"\nxcodebuild -target \"${FRAMEWORK_NAME} Framework\" -configuration Debug -arch x86_64 -arch i386 only_active_arch=no defines_module=yes -sdk \"iphonesimulator\"\n\n# 5\n# Remove .framework file if exists on Desktop from previous run.\nif [ -d \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild/${FRAMEWORK_NAME}.framework\"\nfi\n#Remove release build also\n# Remove .framework file if exists on Desktop from previous run.\nif [ -d \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/Release/${FRAMEWORK_NAME}.framework\" ]; then\nrm -rf \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/Release/${FRAMEWORK_NAME}.framework\"\nfi\n\n# 6\n# Copy the device version of framework to Desktop.\ncp -r \"${SRCROOT}/build/Debug-iphoneos/${FRAMEWORK_NAME}.framework\" \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/Release/${FRAMEWORK_NAME}.framework\"\n\ncp -r \"${SRCROOT}/build/Debug-iphoneos/${FRAMEWORK_NAME}.framework\" \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild/${FRAMEWORK_NAME}.framework\"\n\n# 7\n# Replace the framework executable within the framework with\n# a new version created by merging the device and simulator\n# frameworks' executables with lipo.\nlipo -create -output \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Debug-iphoneos/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\" \"${SRCROOT}/build/Debug-iphonesimulator/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n\n# 8\n# Copy the Swift module mappings for the simulator into the\n# framework.  The device mappings already exist from step 6.\ncp -r \"${SRCROOT}/build/Debug-iphonesimulator/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule/\" \"${HOME}/Desktop/NextGenBuilds/${FRAMEWORK_NAME}/FatBuild/${FRAMEWORK_NAME}.framework/Modules/${FRAMEWORK_NAME}.swiftmodule\"\n\n# 9\n# Delete the most recent build.\nif [ -d \"${SRCROOT}/build\" ]; then\nrm -rf \"${SRCROOT}/build\"\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1777D3DA1D757AF50037C7F1 /* Sources */ = {
@@ -371,6 +407,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -408,6 +445,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
@@ -421,6 +459,24 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		8F2E02CC2277FA22001523B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YS4F7VX5G2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		8F2E02CD2277FA22001523B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YS4F7VX5G2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -555,6 +611,15 @@
 			buildConfigurations = (
 				1D104D8E1ACA36CC00973364 /* Debug */,
 				1D104D8F1ACA36CC00973364 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8F2E02CE2277FA22001523B6 /* Build configuration list for PBXAggregateTarget "Aggregate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F2E02CC2277FA22001523B6 /* Debug */,
+				8F2E02CD2277FA22001523B6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
